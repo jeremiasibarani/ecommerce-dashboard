@@ -38,3 +38,6 @@ with plotcol2:
 
 plot2 = visualize_product_by_review(get_order_product_review(start_date, end_date))
 st.plotly_chart(plot2)
+
+plot3 = visualize_rfm(get_rfm_customer(start_date, end_date))
+st.plotly_chart(plot3)

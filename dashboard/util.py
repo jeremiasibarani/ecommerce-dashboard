@@ -16,7 +16,7 @@ revenue = load_csv('./dashboard/revenue.csv')
 product_review = load_csv('./dashboard/order_product_review.csv')
 payment_report = load_csv('./dashboard/payment_report.csv')
 orders = load_csv('./dashboard/orders.csv')
-
+rfm = load_csv('./dashboard/rfm.csv')
 
 MIN_DATE = parse_date('2016-01-01')
 MAX_DATE = parse_date('2018-12-01')
@@ -115,7 +115,12 @@ def get_payment_status(min_date, max_date):
 
     return pd.DataFrame.from_dict(data)
 
-
+def get_rfm_customer(min_date, max_date):
+    rfm['date'] = pd.to_datetime(rfm['date']).dt.date
+    return rfm[
+        (rfm['date'] >= min_date) & 
+        (rfm['date'] <= max_date)
+    ]
 
 def visualize_delivery(df):
     fig = px.pie(
@@ -185,3 +190,65 @@ def visualize_product_by_review(df):
 
     return fig
 
+def visualize_rfm(df):
+    df['customer_id'] = df['customer_id'].str[:5]
+    recency = df.sort_values(by='recency', ascending=False).head(5)
+    frequency = df.sort_values(by='frequency', ascending=False).head(5)
+    monetary = df.sort_values(by='monetary', ascending=False).head(5)
+
+    fig = make_subplots(
+    rows=1, cols=3,
+    subplot_titles=["Recency","Frequency", "Monetary"],
+    shared_yaxes=False
+    )
+
+    fig.add_trace(
+    go.Bar(
+            x=recency['recency'],
+            y=recency['customer_id'],
+            text=recency['recency'],
+            textposition="auto",
+            orientation='h',
+            marker_color="blue"
+        ),
+        row=1, col=1
+    )
+
+    fig.add_trace(
+    go.Bar(
+            x=frequency['frequency'],
+            y=frequency['customer_id'],
+            text=frequency['frequency'],
+            textposition="auto",
+            orientation='h',
+            marker_color="blue"
+        ),
+        row=1, col=2
+    )
+
+    fig.add_trace(
+    go.Bar(
+            x=monetary['monetary'],
+            y=monetary['customer_id'],
+            text=monetary['monetary'],
+            textposition="auto",
+            orientation='h',
+            marker_color="blue"
+        ),
+        row=1, col=3
+    )
+
+
+    fig.update_layout(
+        height=600,
+        width=1200,
+        showlegend=False,
+        title=dict(
+        text='Best customers by RFM measurement'
+        ),
+        xaxis_title='Value',
+        yaxis_title='Customer id'
+    )
+
+
+    return fig
